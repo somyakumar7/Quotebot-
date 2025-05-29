@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuoteBot - Futuristic AI Chatbot</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;500&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0d0d1a, #1a1a3d, #2a2a5e);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: holographicEntry 1.2s ease-in-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: scanLine 4s linear infinite;
+        }
+
+        .chat-header h1 {
+            color: #fff;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #00f0ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            animation: neonPulse 2s infinite alternate;
+        }
+
+        .theme-selector select {
+            padding: 12px;
+            border: none;
+            background: rgba(0, 255, 255, 0.1);
+            color: #00f0ff;
+            border-radius: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .theme-selector select:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .voice-toggle, .mode-toggle {
+            background: none;
+            border: none;
+            color: #00f0ff;
+            font-size: 22px;
+            cursor: pointer;
+            transition: transform 0.3s, text-shadow 0.3s;
+        }
+
+        .voice-toggle:hover, .mode-toggle:hover {
+            transform: scale(1.2);
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"%3E%3Ccircle cx="400" cy="300" r="200" fill="none" stroke="rgba(0,255,255,0.1)" stroke-width="2" /%3E%3C/svg%3E') center;
+            background-size: cover;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 15px 20px;
+            border-radius: 15px;
+            animation: cyberSlide 0.7s ease-in-out;
+            font-size: 16px;
+            line-height: 1.6;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .message:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #ff00ff, #00f0ff);
+            color: #fff;
+            align-self: flex-end;
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .bot-message {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            align-self: flex-start;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .bot-message .quote {
+            font-family: 'Roboto Mono', monospace;
+            font-style: italic;
+            margin-bottom: 12px;
+            font-weight: 300;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+        }
+
+        .bot-message .author {
+            font-size: 14px;
+            color: #00f0ff;
+            text-align: right;
+            font-weight: 500;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            padding: 10px;
+            color: #00f0ff;
+            font-family: 'Roboto Mono', monospace;
+            font-style: italic;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            animation: cyberBounce 0.5s infinite alternate;
+            margin: 0 2px;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        .typing-indicator span:nth-child(4) { animation-delay: 0.6s; }
+        .typing-indicator span:nth-child(5) { animation-delay: 0.8s; }
+
+        .chat-input {
+            display: flex;
+            padding: 20px;
+            background: rgba(0, 255, 255, 0.05);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: rgba(0, 255, 255, 0.1);
+            color: #00f0ff;
+            border-radius: 15px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .chat-input input:focus {
+            background: rgba(0, 255, 255, 0.2);
+            transform: scale(1.03);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .chat-input button {
+            padding: 15px 30px;
+            margin-left: 15px;
+            border: none;
+            background: linear-gradient(135deg, #ff00ff, #00f0ff);
+            color: #fff;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .chat-input button:hover {
+            background: linear-gradient(135deg, #00f0ff, #ff00ff);
+            transform: scale(1.15);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.7);
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(0, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 10s infinite linear;
+        }
+
+        @keyframes holographicEntry {
+            from { opacity: 0; transform: scale(0.8) rotateX(20deg); }
+            to { opacity: 1; transform: scale(1) rotateX(0); }
+        }
+
+        @keyframes neonPulse {
+            from { text-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+            to { text-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
+        }
+
+        @keyframes scanLine {
+            from { left: -100%; }
+            to { left: 100%; }
+        }
+
+        @keyframes cyberSlide {
+            from { opacity: 0; transform: translateY(40px) rotateX(10deg); }
+            to { opacity: 1; transform: translateY(0) rotateX(0); }
+        }
+
+        @keyframes cyberBounce {
+            to { transform: translateY(-8px); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0.5); }
+            100% { transform: translateY(-100vh) scale(1); }
+        }
+
+        .chat-body::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .chat-body::-webkit-scrollbar-track {
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .chat-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #ff00ff, #00f0ff);
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>QuoteBot</h1>
+            <div class="theme-selector">
+                <select id="theme-select">
+                    <option value="all">All Themes</option>
+                    <option value="inspiration">Inspiration</option>
+                    <option value="wisdom">Wisdom</option>
+                    <option value="humor">Humor</option>
+                    <option value="love">Love</option>
+                </select>
+                <button class="voice-toggle" onclick="toggleVoice()">🎙️</button>
+            </div>
+        </div>
+        <div class="chat-body" id="chat-body">
+            <div class="bot-message">
+                <div class="quote">"The only way to do great work is to love what you do."</div>
+                <div class="author">— Steve Jobs</div>
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type or speak your message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <audio id="message-sound" src="https://www.soundjay.com/buttons/beep-01a.mp3"></audio>
+    <audio id="response-sound" src="https://www.soundjay.com/buttons/beep-02.mp3"></audio>
+
+    <script>
+        const quotes = [
+            // Philosophy
+            { text: "I think, therefore I am.", author: "René Descartes", theme: "philosophy", sentiment: "neutral", weight: 0.8 },
+            { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Aristotle", theme: "philosophy", sentiment: "positive", weight: 0.9 },
+            // Literature
+            { text: "All that we see or seem is but a dream within a dream.", author: "Edgar Allan Poe", theme: "literature", sentiment: "neutral", weight: 0.7 },
+            { text: "Not all those who wander are lost.", author: "J.R.R. Tolkien", theme: "literature", sentiment: "positive", weight: 0.85 },
+            // Movies
+            { text: "May the Force be with you.", author: "Star Wars", theme: "movies", sentiment: "positive", weight: 0.9 },
+            { text: "Life is like a box of chocolates; you never know what you’re gonna get.", author: "Forrest Gump", theme: "movies", sentiment: "neutral", weight: 0.8 },
+            // Science
+            { text: "Imagination is more important than knowledge.", author: "Albert Einstein", theme: "science", sentiment: "positive", weight: 0.9 },
+            { text: "The universe is a pretty big place.", author: "Carl Sagan", theme: "science", sentiment: "neutral", weight: 0.7 },
+            // Motivation
+            { text: "The only way to do great work is to love what you do.", author: "Steve Jobs", theme: "motivation", sentiment: "positive", weight: 0.95 },
+            { text: "You miss 100% of the shots you don’t take.", author: "Wayne Gretzky", theme: "motivation", sentiment: "positive", weight: 0.9 },
+            // Theme-Specific
+            { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt", theme: "inspiration", sentiment: "positive", weight: 0.95 },
+            { text: "Wisdom begins in wonder.", author: "Socrates", theme: "wisdom", sentiment: "positive", weight: 0.9 },
+            { text: "I told my wife she was drawing her eyebrows too high. She looked surprised.", author: "Unknown", theme: "humor", sentiment: "positive", weight: 0.8 },
+            { text: "Love is not only something you feel, it is something you do.", author: "David Wilkerson", theme: "love", sentiment: "positive", weight: 0.85 },
+            // ... (Add more to reach 200+ quotes)
+        ];
+
+        // Sentiment and theme keywords
+        const positiveWords = ['happy', 'love', 'success', 'inspire', 'motivate', 'great', 'hope', 'dream'];
+        const negativeWords = ['sad', 'fail', 'lose', 'fear', 'death', 'hate'];
+        const humorWords = ['funny', 'joke', 'laugh', 'humor'];
+        const loveWords = ['love', 'heart', 'romance', 'affection'];
+
+        // Weighted quote selection
+        function calculateRelevance(quote, input, selectedTheme) {
+            let score = quote.weight || 0.5;
+            const inputLower = input.toLowerCase();
+            if (selectedTheme !== 'all' && quote.theme === selectedTheme) score += 0.3;
+            if (input) {
+                const keywords = inputLower.split(' ');
+                if (keywords.some(keyword => quote.text.toLowerCase().includes(keyword) || quote.author.toLowerCase().includes(keyword))) {
+                    score += 0.2;
+                }
+                const sentiment = analyzeSentiment(inputLower);
+                if (quote.sentiment === sentiment) score += 0.2;
+            }
+            return score;
+        }
+
+        function analyzeSentiment(input) {
+            if (humorWords.some(word => input.includes(word))) return 'humor';
+            if (loveWords.some(word => input.includes(word))) return 'love';
+            if (positiveWords.some(word => input.includes(word))) return 'positive';
+            if (negativeWords.some(word => input.includes(word))) return 'negative';
+            return 'neutral';
+        }
+
+        function getQuote(userInput, selectedTheme) {
+            let filteredQuotes = quotes.filter(quote => selectedTheme === 'all' || quote.theme === selectedTheme);
+            if (!filteredQuotes.length) filteredQuotes = quotes;
+
+            if (userInput) {
+                filteredQuotes = filteredQuotes.map(quote => ({
+                    ...quote,
+                    relevance: calculateRelevance(quote, userInput, selectedTheme)
+                }));
+                filteredQuotes.sort((a, b) => b.relevance - a.relevance);
+                return filteredQuotes[0];
+            }
+
+            return filteredQuotes[Math.floor(Math.random() * filteredQuotes.length)];
+        }
+
+        function addMessage(text, isUser) {
+            const chatBody = document.getElementById('chat-body');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            if (!isUser) {
+                messageDiv.innerHTML = `<div class="quote">"${text.text}"</div><div class="author">— ${text.author}</div>`;
+                document.getElementById('response-sound').play();
+            } else {
+                messageDiv.textContent = text;
+                document.getElementById('message-sound').play();
+            }
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const chatBody = document.getElementById('chat-body');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.innerHTML = 'QuoteBot is scanning the matrix<span>.</span><span>.</span><span>.</span><span>.</span><span>.</span>';
+            chatBody.appendChild(typingDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+            return typingDiv;
+        }
+
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value.trim();
+            const selectedTheme = document.getElementById('theme-select').value;
+            if (!userInput && selectedTheme === 'all') return;
+
+            if (userInput) {
+                addMessage(userInput, true);
+            }
+
+            const typingIndicator = showTypingIndicator();
+            setTimeout(() => {
+                typingIndicator.remove();
+                const quote = getQuote(userInput, selectedTheme);
+                addMessage(quote, false);
+            }, 1500);
+
+            document.getElementById('user-input').value = '';
+        }
+
+        // Voice recognition
+        let isListening = false;
+        const recognition = window.SpeechRecognition || window.webkitSpeechRecognition ?
+            new (window.SpeechRecognition || window.webkitSpeechRecognition)() : null;
+
+        if (recognition) {
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('user-input').value = transcript;
+                sendMessage();
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+            };
+        }
+
+        function toggleVoice() {
+            if (!recognition) {
+                alert('Speech recognition not supported in this browser.');
+                return;
+            }
+            if (isListening) {
+                recognition.stop();
+                document.querySelector('.voice-toggle').textContent = '🎙️';
+                document.querySelector('.voice-toggle').style.textShadow = 'none';
+            } else {
+                recognition.start();
+                document.querySelector('.voice-toggle').textContent = '🔊';
+                document.querySelector('.voice-toggle').style.textShadow = '0 0 15px rgba(0, 255, 255, 0.7)';
+            }
+            isListening = !isListening;
+        }
+
+        // Particle effect
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = `${Math.random() * 5 + 2}px`;
+                particle.style.height = particle.style.width;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 10}s`;
+                particle.style.opacity = Math.random() * 0.5 + 0.1;
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        document.getElementById('user-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        document.getElementById('theme-select').addEventListener('change', () => {
+            const selectedTheme = document.getElementById('theme-select').value;
+            if (selectedTheme !== 'all') {
+                const typingIndicator = showTypingIndicator();
+                setTimeout(() => {
+                    typingIndicator.remove();
+                    const quote = getQuote('', selectedTheme);
+                    addMessage(quote, false);
+                }, 1500);
+            }
+        });
+    </script>
+</body>
+</html>
